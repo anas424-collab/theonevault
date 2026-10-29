@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Debt Freedom Planner - THE ONE VAULT</title>
+<meta name="description" content="Snowball vs Avalanche debt payoff plan. Become debt-free with a custom plan. Free tool by THE ONE VAULT.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui;background:#0a0a0f;color:#fff;padding:20px}
+.wrap{max-width:760px;margin:0 auto}
+a.back{color:#a855f7;text-decoration:none;font-weight:600}
+h1{font-size:clamp(26px,5vw,40px);margin:16px 0 8px}
+.sub{color:#9ca3af;margin-bottom:28px}
+.card{background:linear-gradient(145deg,#1a1a24,#12121a);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:28px}
+label{display:block;margin:14px 0 6px;color:#d1d5db;font-size:14px}
+input,select{width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:#0a0a0f;color:#fff;font-size:16px}
+.debtrow{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;margin-bottom:10px}
+button{margin-top:20px;padding:14px 22px;border:0;border-radius:100px;background:#fff;color:#000;font-weight:700;font-size:15px;cursor:pointer}
+button.sec{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.25)}
+.result{display:none;margin-top:24px;background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.4);border-radius:16px;padding:20px}
+.result .row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+.result .row:last-child{border-bottom:0}
+.result .row b{font-size:18px}
+ol{margin:12px 0 0 20px;line-height:1.9;color:#d1d5db}
+.note{color:#6b7280;font-size:12px;margin-top:20px;line-height:1.6;text-align:center}
+@media(max-width:600px){.debtrow{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<a class="back" href="index.html">← Back to THE ONE VAULT</a>
+<h1>💳 Debt Freedom Planner</h1>
+<p class="sub">Snowball vs Avalanche — build your custom payoff plan.</p>
+<div class="card">
+<div id="debts">
+<div class="debtrow">
+<input placeholder="Debt name (e.g. Credit Card)" value="Credit Card">
+<input type="number" placeholder="Balance" value="5000" min="0">
+<input type="number" placeholder="APR %" value="22" min="0" step="0.1">
+<input type="number" placeholder="Min pay" value="150" min="0">
+</div>
+<div class="debtrow">
+<input placeholder="Debt name" value="Car Loan">
+<input type="number" placeholder="Balance" value="8000" min="0">
+<input type="number" placeholder="APR %" value="8" min="0" step="0.1">
+<input type="number" placeholder="Min pay" value="220" min="0">
+</div>
+</div>
+<button class="sec" onclick="addRow()">+ Add Debt</button>
+<label>Extra Monthly Payment (USD)</label>
+<input type="number" id="extra" value="200" min="0">
+<label>Method</label>
+<select id="method">
+<option value="snowball">Snowball — smallest balance first (motivation)</option>
+<option value="avalanche">Avalanche — highest APR first (least interest)</option>
+</select>
+<button onclick="calc()">Build My Plan →</button>
+<div class="result" id="result">
+<div class="row"><span>Debt-Free In</span><b id="months">—</b></div>
+<div class="row"><span>Total Interest Paid</span><b id="interest">$0</b></div>
+<div class="row"><span>Total Paid</span><b id="total">$0</b></div>
+<div style="margin-top:12px">Pay off in this order:</div>
+<ol id="order"></ol>
+</div>
+</div>
+<p class="note">Estimate only. Assumes fixed APRs, minimum payments always made, and no new borrowing. Snowball and Avalanche use the same budget — only the payoff order differs.</p>
+</div>
+<script>
+function addRow(){
+  var d = document.createElement('div');
+  d.className = 'debtrow';
+  d.innerHTML = '<input placeholder="Debt name"><input type="number" placeholder="Balance" min="0"><input type="number" placeholder="APR %" min="0" step="0.1"><input type="number" placeholder="Min pay" min="0">';
+  document.getElementById('debts').appendChild(d);
+}
+function money(x){ return '$' + Math.round(x).toLocaleString(); }
+function calc(){
+  var rows = document.querySelectorAll('#debts .debtrow');
+  var debts = [];
+  rows.forEach(function(r){
+    var i = r.querySelectorAll('input');
+    var bal = parseFloat(i[1].value) || 0;
+    if (bal > 0) debts.push({name: i[0].value || 'Debt', bal: bal, apr: parseFloat(i[2].value) || 0, min: parseFloat(i[3].value) || 0});
+  });
+  if (!debts.length){ alert('Add at least one debt with a balance.'); return; }
+  var extra = parseFloat(document.getElementById('extra').value) || 0;
+  var method = document.getElementById('method').value;
+  var order = debts.slice().sort(function(a, b){
+    return method === 'snowball' ? a.bal - b.bal : b.apr - a.apr;
+  });
+  var sim = order.map(function(d){ return {name: d.name, bal: d.bal, apr: d.apr, min: d.min}; });
+  var totalInterest = 0, months = 0;
+  while (sim.some(function(d){ return d.bal > 0; }) && months < 600){
+    months++;
+    sim.forEach(function(d){ if (d.bal > 0) { var it = d.bal * d.apr / 100 / 12; d.bal += it; totalInterest += it; } });
+    var budget = extra + sim.reduce(function(s, d){ return s + (d.bal > 0 ? d.min : 0); }, 0);
+    sim.forEach(function(d){ if (d.bal > 0){ var pay = Math.min(d.min, d.bal); d.bal -= pay; budget -= pay; } });
+    for (var k = 0; k < sim.length && budget > 0; k++){
+      if (sim[k].bal > 0){ var pay2 = Math.min(budget, sim[k].bal); sim[k].bal -= pay2; budget -= pay2; }
+    }
+  }
+  var totalPaid = debts.reduce(function(s, d){ return s + d.bal; }, 0) + totalInterest;
+  document.getElementById('months').textContent = months >= 600 ? 'Over 50 years — raise your payment' : months + ' months (' + (months / 12).toFixed(1) + ' years)';
+  document.getElementById('interest').textContent = money(totalInterest);
+  document.getElementById('total').textContent = money(totalPaid);
+  document.getElementById('order').innerHTML = order.map(function(d, i){ return '<li>' + d.name + ' — ' + money(d.bal) + ' at ' + d.apr + '% APR</li>'; }).join('');
+  document.getElementById('result').style.display = 'block';
+}
+</script>
+</body>
+</html>

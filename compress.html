@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Compressor - THE ONE VAULT</title>
+<meta name="description" content="Compress JPG, PNG and WebP images in your browser without quality loss. Free tool by THE ONE VAULT.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui;background:#0a0a0f;color:#fff;padding:20px}
+.wrap{max-width:720px;margin:0 auto}
+a.back{color:#a855f7;text-decoration:none;font-weight:600}
+h1{font-size:clamp(26px,5vw,40px);margin:16px 0 8px}
+.sub{color:#9ca3af;margin-bottom:28px}
+.card{background:linear-gradient(145deg,#1a1a24,#12121a);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:28px}
+label{display:block;margin:16px 0 6px;color:#d1d5db;font-size:14px}
+input[type=file],input[type=range],select{width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:#0a0a0f;color:#fff;font-size:16px}
+button{margin-top:20px;padding:14px 26px;border:0;border-radius:100px;background:#fff;color:#000;font-weight:700;font-size:15px;cursor:pointer}
+button.sec{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.25)}
+#preview img{max-width:100%;border-radius:16px;margin-top:20px}
+.result{display:none;margin-top:20px;background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.4);border-radius:16px;padding:20px;line-height:1.9}
+.note{color:#6b7280;font-size:12px;margin-top:20px;line-height:1.6;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+<a class="back" href="index.html">← Back to THE ONE VAULT</a>
+<h1>🖼️ Image Compressor</h1>
+<p class="sub">Compress JPG, PNG & WebP — 100% client-side, nothing uploads.</p>
+<div class="card">
+<label>Choose an image</label>
+<input type="file" id="file" accept="image/*">
+<label>Quality: <span id="qval">80%</span></label>
+<input type="range" id="quality" min="10" max="100" value="80" oninput="document.getElementById('qval').textContent=this.value+'%'">
+<label>Output format</label>
+<select id="format">
+<option value="image/jpeg">JPEG (smallest, no transparency)</option>
+<option value="image/webp">WebP (best quality/size)</option>
+<option value="image/png">PNG (keeps transparency)</option>
+</select>
+<div>
+<button onclick="compress()">Compress →</button>
+<button class="sec" id="dlBtn" style="display:none" onclick="download()">Download Compressed</button>
+</div>
+<div class="result" id="result"></div>
+<div id="preview"></div>
+</div>
+<p class="note">Compression runs fully in your browser using canvas. Original files are never uploaded to any server.</p>
+</div>
+<script>
+var outBlob = null, outName = 'compressed.jpg';
+function fmt(bytes){
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(2) + ' MB';
+}
+function compress(){
+  var f = document.getElementById('file').files[0];
+  if (!f){ alert('Please choose an image first.'); return; }
+  var q = parseInt(document.getElementById('quality').value, 10) / 100;
+  var type = document.getElementById('format').value;
+  var img = new Image();
+  img.onload = function(){
+    var maxSide = 1920, w = img.width, h = img.height;
+    if (Math.max(w, h) > maxSide){ var s = maxSide / Math.max(w, h); w = Math.round(w * s); h = Math.round(h * s); }
+    var c = document.createElement('canvas'); c.width = w; c.height = h;
+    c.getContext('2d').drawImage(img, 0, 0, w, h);
+    c.toBlob(function(blob){
+      outBlob = blob;
+      outName = f.name.replace(/\.[^.]+$/, '') + '-compressed.' + (type === 'image/png' ? 'png' : type === 'image/webp' ? 'webp' : 'jpg');
+      var saved = Math.max(0, Math.round((1 - blob.size / f.size) * 100));
+      document.getElementById('result').style.display = 'block';
+      document.getElementById('result').innerHTML =
+        'Original: <b>' + fmt(f.size) + '</b><br>Compressed: <b>' + fmt(blob.size) + '</b><br>Saved: <b>' + saved + '%</b> • Size: ' + w + ' × ' + h + ' px';
+      document.getElementById('dlBtn').style.display = 'inline-block';
+      var url = URL.createObjectURL(blob);
+      document.getElementById('preview').innerHTML = '<img src="' + url + '" alt="Compressed preview">';
+    }, type, q);
+  };
+  img.onerror = function(){ alert('Could not read this image. Try a JPG, PNG or WebP file.'); };
+  img.src = URL.createObjectURL(f);
+}
+function download(){
+  if (!outBlob) return;
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(outBlob);
+  a.download = outName;
+  a.click();
+}
+</script>
+</body>
+</html>

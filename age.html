@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Age Timeline Calculator - THE ONE VAULT</title>
+<meta name="description" content="How old are you in days? Next birthday, zodiac and fun facts. Free viral tool by THE ONE VAULT.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui;background:#0a0a0f;color:#fff;padding:20px}
+.wrap{max-width:720px;margin:0 auto}
+a.back{color:#a855f7;text-decoration:none;font-weight:600}
+h1{font-size:clamp(26px,5vw,40px);margin:16px 0 8px}
+.sub{color:#9ca3af;margin-bottom:28px}
+.card{background:linear-gradient(145deg,#1a1a24,#12121a);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:28px}
+label{display:block;margin:16px 0 6px;color:#d1d5db;font-size:14px}
+input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:#0a0a0f;color:#fff;font-size:16px;color-scheme:dark}
+button{margin-top:24px;width:100%;padding:14px;border:0;border-radius:100px;background:#fff;color:#000;font-weight:700;font-size:16px;cursor:pointer}
+.result{display:none;margin-top:24px;background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.4);border-radius:16px;padding:20px}
+.result .big{font-size:34px;font-weight:900;text-align:center;margin-bottom:12px}
+.result .row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+.result .row:last-child{border-bottom:0}
+.note{color:#6b7280;font-size:12px;margin-top:20px;line-height:1.6;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+<a class="back" href="index.html">← Back to THE ONE VAULT</a>
+<h1>⏳ Age Timeline Calculator</h1>
+<p class="sub">How old are you in days? Next birthday, zodiac & fun facts.</p>
+<div class="card">
+<label>Your Date of Birth</label>
+<input type="date" id="dob">
+<button onclick="calc()">Reveal My Timeline →</button>
+<div class="result" id="result">
+<div class="big" id="ageLine">—</div>
+<div class="row"><span>Total days lived</span><b id="days">—</b></div>
+<div class="row"><span>Total hours lived</span><b id="hours">—</b></div>
+<div class="row"><span>Next birthday in</span><b id="next">—</b></div>
+<div class="row"><span>Zodiac sign</span><b id="zodiac">—</b></div>
+<div class="row"><span>Born on a</span><b id="weekday">—</b></div>
+<div class="row"><span>Approx. heartbeats so far</span><b id="beats">—</b></div>
+</div>
+</div>
+<p class="note">Fun estimates only — heartbeats estimated at an average resting rate. Your data never leaves your browser.</p>
+</div>
+<script>
+var SIGNS = [[19,'Capricorn'],[18,'Aquarius'],[20,'Pisces'],[19,'Aries'],[20,'Taurus'],[20,'Gemini'],[22,'Cancer'],[22,'Leo'],[22,'Virgo'],[22,'Libra'],[22,'Scorpio'],[21,'Sagittarius'],[31,'Capricorn']];
+function zodiac(m, d){
+  var table = [[1,20,'Capricorn'],[2,19,'Aquarius'],[3,20,'Pisces'],[4,20,'Aries'],[5,21,'Taurus'],[6,21,'Gemini'],[7,23,'Cancer'],[8,23,'Leo'],[9,23,'Virgo'],[10,23,'Libra'],[11,22,'Scorpio'],[12,22,'Sagittarius']];
+  var sign = 'Capricorn';
+  table.forEach(function(t){ if (m === t[0] && d >= t[1] || m === t[0] + 1 && d < t[1]) sign = t[2]; });
+  if (m === 1 && d < 20) sign = 'Capricorn';
+  if (m === 12 && d >= 22) sign = 'Sagittarius';
+  return sign;
+}
+function calc(){
+  var v = document.getElementById('dob').value;
+  if (!v){ alert('Please pick your date of birth.'); return; }
+  var dob = new Date(v + 'T00:00:00'), now = new Date();
+  if (dob > now){ alert('Date of birth cannot be in the future.'); return; }
+  var years = now.getFullYear() - dob.getFullYear();
+  var m = now.getMonth() - dob.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < dob.getDate())) years--;
+  var months = (now.getFullYear() - dob.getFullYear()) * 12 + (now.getMonth() - dob.getMonth()) - (now.getDate() < dob.getDate() ? 1 : 0);
+  var days = Math.floor((now - dob) / 86400000);
+  var next = new Date(now.getFullYear(), dob.getMonth(), dob.getDate());
+  if (next < now) next = new Date(now.getFullYear() + 1, dob.getMonth(), dob.getDate());
+  var daysTo = Math.ceil((next - now) / 86400000);
+  document.getElementById('ageLine').textContent = years + ' years old';
+  document.getElementById('days').textContent = days.toLocaleString() + ' days';
+  document.getElementById('hours').textContent = (days * 24).toLocaleString() + ' hours';
+  document.getElementById('next').textContent = daysTo + ' days (' + next.toDateString() + ')';
+  document.getElementById('zodiac').textContent = zodiac(dob.getMonth() + 1, dob.getDate());
+  document.getElementById('weekday').textContent = dob.toLocaleDateString('en-US', {weekday: 'long'});
+  document.getElementById('beats').textContent = Math.round(days * 24 * 60 * 72).toLocaleString();
+  document.getElementById('result').style.display = 'block';
+}
+</script>
+</body>
+</html>

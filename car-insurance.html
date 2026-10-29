@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Car Insurance Calculator - THE ONE VAULT</title>
+<meta name="description" content="Estimate your monthly car insurance premium for Florida, California, Texas and more. Free calculator by THE ONE VAULT.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui;background:#0a0a0f;color:#fff;padding:20px}
+.wrap{max-width:720px;margin:0 auto}
+a.back{color:#a855f7;text-decoration:none;font-weight:600}
+h1{font-size:clamp(26px,5vw,40px);margin:16px 0 8px}
+.sub{color:#9ca3af;margin-bottom:28px}
+.card{background:linear-gradient(145deg,#1a1a24,#12121a);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:28px}
+label{display:block;margin:16px 0 6px;color:#d1d5db;font-size:14px}
+select,input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:#0a0a0f;color:#fff;font-size:16px}
+button{margin-top:24px;width:100%;padding:14px;border:0;border-radius:100px;background:#fff;color:#000;font-weight:700;font-size:16px;cursor:pointer}
+button:hover{transform:translateY(-1px)}
+.result{display:none;margin-top:24px;background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.4);border-radius:16px;padding:20px;text-align:center}
+.result .big{font-size:40px;font-weight:900;margin:8px 0}
+.result p{color:#9ca3af;font-size:14px;line-height:1.6}
+.note{color:#6b7280;font-size:12px;margin-top:20px;line-height:1.6;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+<a class="back" href="index.html">← Back to THE ONE VAULT</a>
+<h1>🚗 Car Insurance Calculator</h1>
+<p class="sub">Estimate your monthly premium instantly. Select your details below.</p>
+<div class="card">
+<label>State</label>
+<select id="state">
+<option value="FL">Florida</option>
+<option value="CA">California</option>
+<option value="TX">Texas</option>
+<option value="NY">New York</option>
+<option value="OTHER">Other US State</option>
+</select>
+<label>Driver Age</label>
+<input type="number" id="age" value="30" min="16" max="90">
+<label>Car Value (USD)</label>
+<input type="number" id="value" value="20000" min="1000" step="500">
+<label>Coverage</label>
+<select id="coverage">
+<option value="full">Full Coverage</option>
+<option value="liability">Liability Only</option>
+</select>
+<label>Accidents / Violations (last 3 years)</label>
+<select id="violations">
+<option value="0">0 — Clean record</option>
+<option value="1">1</option>
+<option value="2">2+</option>
+</select>
+<button onclick="calc()">Calculate Premium →</button>
+<div class="result" id="result">
+<div>Estimated Monthly Premium</div>
+<div class="big" id="monthly">$0</div>
+<div>Estimated Annual: <strong id="annual">$0</strong></div>
+<p id="breakdown"></p>
+</div>
+</div>
+<p class="note">Estimate only, based on average state rate patterns — not an insurance quote. Actual premiums vary by insurer, credit, mileage and exact vehicle.</p>
+</div>
+<script>
+function calc(){
+  var base = {FL:235, CA:205, TX:185, NY:220, OTHER:165}[document.getElementById('state').value];
+  var age = parseFloat(document.getElementById('age').value) || 30;
+  var value = parseFloat(document.getElementById('value').value) || 20000;
+  var cov = document.getElementById('coverage').value;
+  var vio = parseInt(document.getElementById('violations').value, 10);
+  var m = base;
+  if (age < 25) m *= 1.6; else if (age >= 65) m *= 1.15;
+  if (cov === 'liability') m *= 0.55; else m += Math.min(value * 0.0015, 90);
+  m *= (1 + vio * 0.25);
+  m = Math.round(m);
+  document.getElementById('monthly').textContent = '$' + m;
+  document.getElementById('annual').textContent = '$' + (m * 12).toLocaleString();
+  document.getElementById('breakdown').textContent =
+    'State base $' + base + '/mo' + (age < 25 ? ' • young-driver adjustment applied' : '') +
+    (cov === 'liability' ? ' • liability only' : ' • full coverage incl. vehicle value') +
+    (vio ? ' • ' + vio + ' violation(s) surcharge' : ' • clean record discount applied');
+  document.getElementById('result').style.display = 'block';
+}
+</script>
+</body>
+</html>

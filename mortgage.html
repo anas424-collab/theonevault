@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mortgage Refinance Calculator - THE ONE VAULT</title>
+<meta name="description" content="Calculate refinance savings, new monthly payment and break-even point for US homeowners. Free calculator by THE ONE VAULT.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui;background:#0a0a0f;color:#fff;padding:20px}
+.wrap{max-width:720px;margin:0 auto}
+a.back{color:#a855f7;text-decoration:none;font-weight:600}
+h1{font-size:clamp(26px,5vw,40px);margin:16px 0 8px}
+.sub{color:#9ca3af;margin-bottom:28px}
+.card{background:linear-gradient(145deg,#1a1a24,#12121a);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:28px}
+label{display:block;margin:16px 0 6px;color:#d1d5db;font-size:14px}
+input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:#0a0a0f;color:#fff;font-size:16px}
+button{margin-top:24px;width:100%;padding:14px;border:0;border-radius:100px;background:#fff;color:#000;font-weight:700;font-size:16px;cursor:pointer}
+button:hover{transform:translateY(-1px)}
+.result{display:none;margin-top:24px;background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.4);border-radius:16px;padding:20px}
+.result .row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+.result .row:last-child{border-bottom:0}
+.result .row b{font-size:18px}
+.note{color:#6b7280;font-size:12px;margin-top:20px;line-height:1.6;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+<a class="back" href="index.html">← Back to THE ONE VAULT</a>
+<h1>🏠 Mortgage Refinance Calculator</h1>
+<p class="sub">See your new payment, monthly savings and break-even point.</p>
+<div class="card">
+<label>Remaining Loan Balance (USD)</label>
+<input type="number" id="bal" value="250000" min="1000" step="1000">
+<label>Current Interest Rate (% per year)</label>
+<input type="number" id="oldRate" value="7.5" min="0" step="0.125">
+<label>Current Monthly Payment (USD)</label>
+<input type="number" id="oldPay" value="1900" min="0" step="10">
+<label>New Interest Rate (% per year)</label>
+<input type="number" id="newRate" value="6.0" min="0" step="0.125">
+<label>New Loan Term (years)</label>
+<input type="number" id="term" value="30" min="5" max="40">
+<label>Closing Costs (USD)</label>
+<input type="number" id="costs" value="5000" min="0" step="100">
+<button onclick="calc()">Calculate Savings →</button>
+<div class="result" id="result">
+<div class="row"><span>New Monthly Payment</span><b id="newPay">$0</b></div>
+<div class="row"><span>Monthly Savings</span><b id="save">$0</b></div>
+<div class="row"><span>Break-Even Point</span><b id="be">—</b></div>
+<div class="row"><span>Total Interest (new loan)</span><b id="int">$0</b></div>
+</div>
+</div>
+<p class="note">Estimate only. Assumes fixed-rate, fully amortizing loan with no extra fees, taxes or insurance changes. Not a lending offer.</p>
+</div>
+<script>
+function pmt(principal, annualRate, years){
+  var r = annualRate / 100 / 12, n = years * 12;
+  if (r === 0) return principal / n;
+  return principal * r / (1 - Math.pow(1 + r, -n));
+}
+function money(x){ return '$' + Math.round(x).toLocaleString(); }
+function calc(){
+  var bal = parseFloat(document.getElementById('bal').value) || 0;
+  var oldPay = parseFloat(document.getElementById('oldPay').value) || 0;
+  var newRate = parseFloat(document.getElementById('newRate').value) || 0;
+  var term = parseFloat(document.getElementById('term').value) || 30;
+  var costs = parseFloat(document.getElementById('costs').value) || 0;
+  var np = pmt(bal, newRate, term);
+  var save = oldPay - np;
+  var be = save > 0 ? Math.ceil(costs / save) + ' months' : 'No savings at this rate';
+  var totalInt = np * term * 12 - bal;
+  document.getElementById('newPay').textContent = money(np);
+  document.getElementById('save').textContent = (save >= 0 ? '' : '−') + money(Math.abs(save));
+  document.getElementById('be').textContent = be;
+  document.getElementById('int').textContent = money(totalInt);
+  document.getElementById('result').style.display = 'block';
+}
+</script>
+</body>
+</html>

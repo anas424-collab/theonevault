@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word Counter Pro - THE ONE VAULT</title>
+<meta name="description" content="Count words, characters, sentences and reading time instantly. Free tool by THE ONE VAULT.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui;background:#0a0a0f;color:#fff;padding:20px}
+.wrap{max-width:760px;margin:0 auto}
+a.back{color:#a855f7;text-decoration:none;font-weight:600}
+h1{font-size:clamp(26px,5vw,40px);margin:16px 0 8px}
+.sub{color:#9ca3af;margin-bottom:28px}
+.card{background:linear-gradient(145deg,#1a1a24,#12121a);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:28px}
+textarea{width:100%;min-height:220px;padding:16px;border-radius:16px;border:1px solid rgba(255,255,255,.15);background:#0a0a0f;color:#fff;font-size:16px;line-height:1.6;resize:vertical}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:14px;margin-top:20px}
+.stat{background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.3);border-radius:16px;padding:16px;text-align:center}
+.stat b{display:block;font-size:28px}
+.stat span{color:#9ca3af;font-size:12px}
+button{margin-top:20px;padding:12px 22px;border:0;border-radius:100px;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.25);font-weight:600;font-size:14px;cursor:pointer}
+.note{color:#6b7280;font-size:12px;margin-top:20px;line-height:1.6;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+<a class="back" href="index.html">← Back to THE ONE VAULT</a>
+<h1>📝 Word Counter Pro</h1>
+<p class="sub">Type or paste your text — counts update live.</p>
+<div class="card">
+<textarea id="text" placeholder="Start typing or paste your text here…" oninput="count()"></textarea>
+<div class="stats">
+<div class="stat"><b id="words">0</b><span>Words</span></div>
+<div class="stat"><b id="chars">0</b><span>Characters</span></div>
+<div class="stat"><b id="charsNoSpace">0</b><span>Chars (no spaces)</span></div>
+<div class="stat"><b id="sentences">0</b><span>Sentences</span></div>
+<div class="stat"><b id="paras">0</b><span>Paragraphs</span></div>
+<div class="stat"><b id="reading">0 min</b><span>Reading time</span></div>
+</div>
+<button onclick="document.getElementById('text').value='';count()">Clear Text</button>
+</div>
+<p class="note">Reading time estimated at 200 words per minute. Everything runs in your browser — your text never leaves your device.</p>
+</div>
+<script>
+function count(){
+  var t = document.getElementById('text').value;
+  var words = t.trim() ? t.trim().split(/\s+/).length : 0;
+  var sentences = t.trim() ? (t.match(/[^.!?]+[.!?]+/g) || []).length : 0;
+  var paras = t.trim() ? t.split(/\n\s*\n/).filter(function(p){ return p.trim(); }).length : 0;
+  document.getElementById('words').textContent = words;
+  document.getElementById('chars').textContent = t.length;
+  document.getElementById('charsNoSpace').textContent = t.replace(/\s/g, '').length;
+  document.getElementById('sentences').textContent = sentences;
+  document.getElementById('paras').textContent = paras;
+  document.getElementById('reading').textContent = (words / 200 < 1 && words > 0 ? '< 1 min' : Math.ceil(words / 200) + ' min');
+}
+</script>
+</body>
+</html>
